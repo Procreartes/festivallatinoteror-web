@@ -84,13 +84,13 @@ p{margin:0 0 1em}
 .boton-vino:hover{background:var(--magenta);color:#fff;transform:translateY(-2px)}
 .portada-cartel{position:relative;align-self:end;margin:0}
 .portada-cartel img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:var(--radio) var(--radio) 0 0;box-shadow:0 -20px 60px rgba(0,0,0,.35);background:var(--vino-2)}
-.sello{position:absolute;left:-28px;top:24px;width:118px;height:118px;border-radius:50%;background:var(--sol);color:var(--noche);display:grid;place-items:center;text-align:center;font:800 1.05rem/1 var(--f-titulo);text-transform:uppercase;transform:rotate(-10deg);box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.sello{position:absolute;left:-28px;bottom:36px;width:118px;height:118px;border-radius:50%;background:var(--sol);color:var(--noche);display:grid;place-items:center;text-align:center;font:800 1.05rem/1 var(--f-titulo);text-transform:uppercase;transform:rotate(-10deg);box-shadow:0 10px 30px rgba(0,0,0,.3)}
 .sello strong{display:block;font-size:2.6rem;font-style:italic;line-height:.85}
 @media (max-width:880px){
   .portada .contenedor{grid-template-columns:1fr}
   .portada-texto{padding-bottom:8px}
   .portada-cartel{max-width:440px;justify-self:center;width:100%}
-  .sello{left:auto;right:-6px;top:-30px;width:100px;height:100px;font-size:.95rem}
+  .sello{left:auto;right:-6px;bottom:auto;top:-30px;width:100px;height:100px;font-size:.95rem}
   .sello strong{font-size:2.2rem}
 }
 
@@ -277,3 +277,18 @@ p{margin:0 0 1em}
 @keyframes aparece-respaldo{to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.aparece{opacity:1;transform:none;animation:none;transition:none}html{scroll-behavior:auto}}
 .sin-js .aparece{opacity:1;transform:none}
+
+/* Archivo de carteles */
+.carteles{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;margin:0;padding:0;list-style:none}
+.carteles a{text-decoration:none;color:inherit;display:block}
+.carteles figure{margin:0}
+.carteles img{width:100%;aspect-ratio:600/848;object-fit:cover;object-position:top;border-radius:10px;background:var(--vino-2);box-shadow:0 14px 30px rgba(0,0,0,.35);transition:transform .35s ease}
+.carteles li:hover img{transform:translateY(-6px) rotate(-1deg)}
+.carteles figcaption{padding-top:12px}
+.cartel-anio{display:block;font:800 1.6rem/1 var(--f-titulo);font-style:italic;color:var(--rosa)}
+.cartel-cabeza{display:block;margin-top:4px;font-size:.95rem;color:rgba(255,255,255,.8);line-height:1.35}
+.carteles a:hover .cartel-cabeza{color:#fff;text-decoration:underline}
+.nota-archivo{margin:36px 0 0;color:rgba(255,255,255,.7);font-size:.98rem}
+@media (max-width:980px){.carteles{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:620px){.carteles{grid-template-columns:repeat(2,1fr);gap:16px}.cartel-anio{font-size:1.3rem}.cartel-cabeza{font-size:.85rem}}
+.logos img[alt="Ahembo"]{height:30px}

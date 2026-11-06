@@ -163,9 +163,25 @@ def tarjeta_noticia(n):
 
 # ---------------------------------------------------------------- inicio
 def inicio():
-    galeria = "".join(
-        f'<li>{img(f"img/ediciones/edicion-{i}", alt, [600, 1200], "(max-width:720px) 50vw, 25vw")}</li>'
-        for i, alt in enumerate([f"Foto {k} de ediciones anteriores del Festival Latino Villa de Teror" for k in range(1, 7)], start=1))
+    # Archivo de carteles: (año, edición, imagen, anchos, cabezas de cartel, enlace)
+    archivo = [
+        ("2026", "XXX", "img/carteles/cartel-30", [500, 1000], "Tony y Mimy Succar · Tromboranga", "/noticias/mas-de-5000-personas-30-aniversario.html"),
+        ("2025", "XXIX", "img/carteles/cartel-29", [400, 800], "José Alberto «El Canario» · Estrellas de Buena Vista y Más", "/noticias/29-edicion-jose-alberto-el-canario.html"),
+        ("2024", "XXVIII", "img/ediciones/edicion-1", [600, 1200], "Issac Delgado y su Orquesta · Los Troveros de Asieta", ""),
+        ("2023", "XXVII", "img/ediciones/edicion-2", [600, 1200], "Alain Pérez y La Orquesta · Compota de Manana", ""),
+        ("2022", "XXVI", "img/ediciones/edicion-3", [600, 1200], "Juan Formell y Los Van Van · Septeto Santiaguero", ""),
+        ("2019", "XXV", "img/ediciones/edicion-4", [600, 1200], "Mixael Cabrera &amp; su Team Barcelona", ""),
+        ("2018", "XXIV", "img/ediciones/edicion-5", [600, 1200], "Canarias Salsa Allstars", ""),
+        ("2017", "XXIII", "img/ediciones/edicion-6", [600, 1200], "NG2 · Iván «Cacú» y su Orquesta", ""),
+    ]
+    galeria = ""
+    for anio, num, ruta, anchos, cabeza, enlace in archivo:
+        foto = img(ruta, f"Cartel del {num} Festival Latino Villa de Teror ({anio})", anchos, "(max-width:620px) 50vw, (max-width:980px) 33vw, 280px")
+        pie_txt = f'<span class="cartel-anio">{anio} · {num}</span><span class="cartel-cabeza">{cabeza}</span>'
+        if enlace:
+            galeria += f'<li class="aparece"><a href="{enlace}"><figure>{foto}<figcaption>{pie_txt}</figcaption></figure></a></li>'
+        else:
+            galeria += f'<li class="aparece"><figure>{foto}<figcaption>{pie_txt}</figcaption></figure></li>'
 
     ritmos = "".join(f"<span>{r}</span>" for r in
                      ["Salsa", "Son", "Timba", "Bachata", "Kizomba", "Merengue", "Salsa brava", "Son cubano"])
@@ -301,29 +317,10 @@ def inicio():
     <div class="seccion-cabecera aparece">
       {CLAVE}
       <h2 id="titulo-ediciones">Ediciones <span class="acento">anteriores</span></h2>
-      <p>Treinta veranos de ritmo en la Plaza de Sintes, con grandes nombres de la música latina y el talento de las orquestas y academias de Gran Canaria.</p>
+      <p>Treinta veranos de ritmo en la Plaza de Sintes. De Los Van Van a Issac Delgado, de José Alberto «El Canario» a Tony y Mimy Succar: así se han anunciado las últimas ediciones.</p>
     </div>
-    <ul class="galeria aparece">{galeria}</ul>
-    <div class="linea-tiempo">
-      <article class="edicion aparece">
-        {img("img/carteles/cartel-30", "Cartel de la 30.ª edición", [500], "120px")}
-        <div>
-          <p class="num">2026 · 30.ª</p>
-          <h3>Tony y Mimy Succar y Tromboranga</h3>
-          <p>La edición del aniversario: una semana de talleres, la jornada «Gran Canaria Joven» y más de 5.000 personas en la plaza.</p>
-          <a href="/noticias/mas-de-5000-personas-30-aniversario.html">Leer el balance →</a>
-        </div>
-      </article>
-      <article class="edicion aparece">
-        {img("img/carteles/cartel-29", "Cartel de la 29.ª edición", [400], "120px")}
-        <div>
-          <p class="num">2025 · 29.ª</p>
-          <h3>José Alberto «El Canario»</h3>
-          <p>Con Estrellas de Buena Vista y Más (Cuba), Pinto Picasso (Puerto Rico), La Golosina y DJ Nau.</p>
-          <a href="/noticias/29-edicion-jose-alberto-el-canario.html">Leer la noticia →</a>
-        </div>
-      </article>
-    </div>
+    <ul class="carteles">{galeria}</ul>
+    <p class="nota-archivo">2020 y 2021 no hubo festival por la pandemia. ¿Tienes carteles o fotos de las primeras ediciones? Escríbenos a <a href="mailto:{EMAIL}">{EMAIL}</a>.</p>
   </div>
 </section>
 
