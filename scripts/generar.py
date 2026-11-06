@@ -14,7 +14,7 @@ RAIZ = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RAIZ / "scripts"))
 from noticias import NOTICIAS  # noqa: E402
 
-DOMINIO = "https://__DOMINIO__"
+DOMINIO = "https://festivallatinoteror.es"
 EMAIL = "festivallatinoteror@gmail.com"
 EMAIL_PRENSA = "prensa@teror.es"
 INSTAGRAM = "https://www.instagram.com/flvteror/"
@@ -449,7 +449,7 @@ TITULAR = '''<table>
 <tr><th scope="row">Domicilio</th><td>Plaza Muro Nuevo, 2 · 35330 Teror (Las Palmas)</td></tr>
 <tr><th scope="row">Teléfono</th><td><a href="tel:+34928630075">928 630 075</a></td></tr>
 <tr><th scope="row">Email</th><td><a href="mailto:ayuntamiento@teror.es">ayuntamiento@teror.es</a></td></tr>
-<tr><th scope="row">Sitio web</th><td>__DOMINIO__</td></tr>
+<tr><th scope="row">Sitio web</th><td>festivallatinoteror.es</td></tr>
 </table>'''
 
 
