@@ -1,0 +1,13 @@
+# Direcciones de la antigua web de Wix
+/general-6 /#teror 301
+/blog /noticias/ 301
+/blog/* /noticias/ 301
+/post/tony-y-mimy-succar-grandes* /noticias/tony-y-mimy-succar-grandes-protagonistas.html 301
+/post/tony-y-mimy-succar-estar* /noticias/tony-y-mimy-succar-25-de-julio.html 301
+/post/la-29* /noticias/29-edicion-jose-alberto-el-canario.html 301
+/post/teror-calienta-motores* /noticias/teror-calienta-motores-2025.html 301
+/post/* /noticias/ 301
+/pol* /privacidad.html 301
+/t*rminos-y-condiciones /aviso-legal.html 301
+/feslatinoteror / 301
+/feslatinoteror/* / 301
