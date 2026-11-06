@@ -6,10 +6,16 @@
 <title>Noticias · Festival Latino Villa de Teror</title>
 <meta name="description" content="Noticias, carteles y balances del Festival Latino Villa de Teror, en la Plaza de Sintes de Teror (Gran Canaria).">
 <link rel="canonical" href="https://festivallatinoteror.es/noticias/">
+<link rel="alternate" hreflang="es" href="https://festivallatinoteror.es/noticias/">
+<link rel="alternate" hreflang="en" href="https://festivallatinoteror.es/en/news/">
+<link rel="alternate" hreflang="fr" href="https://festivallatinoteror.es/fr/actualites/">
+<link rel="alternate" hreflang="x-default" href="https://festivallatinoteror.es/noticias/">
 <meta name="theme-color" content="#2a0716">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Festival Latino Villa de Teror">
 <meta property="og:locale" content="es_ES">
+<meta property="og:locale:alternate" content="en_GB">
+<meta property="og:locale:alternate" content="fr_FR">
 <meta property="og:title" content="Noticias · Festival Latino Villa de Teror">
 <meta property="og:description" content="Noticias, carteles y balances del Festival Latino Villa de Teror, en la Plaza de Sintes de Teror (Gran Canaria).">
 <meta property="og:url" content="https://festivallatinoteror.es/noticias/">
@@ -28,7 +34,10 @@
 <header class="nav">
   <div class="contenedor">
     <a class="marca" href="/" aria-label="Festival Latino Villa de Teror, ir al inicio"><span class="marca-num" aria-hidden="true">30</span><span>Festival Latino<small>Villa de Teror</small></span></a>
-    <button class="boton-menu" type="button" aria-controls="menu" aria-expanded="false"><span class="visualmente-oculto">Abrir menú</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <div class="nav-derecha">
+      <ul class="idiomas" aria-label="Idioma"><li><span aria-current="true" lang="es" title="Español">ES</span></li><li><a href="/en/news/" hreflang="en" lang="en" title="English">EN</a></li><li><a href="/fr/actualites/" hreflang="fr" lang="fr" title="Français">FR</a></li></ul>
+      <button class="boton-menu" type="button" aria-controls="menu" aria-expanded="false"><span class="visualmente-oculto">Abrir menú</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    </div>
     <ul class="menu" id="menu"><li><a href="/#edicion-30">La 30.ª edición</a></li><li><a href="/noticias/" aria-current="page">Noticias</a></li><li><a href="/#ediciones">Ediciones anteriores</a></li><li><a href="/#sostenibilidad">Sostenibilidad</a></li><li><a href="/#teror">Teror</a></li><li><a href="/#contacto">Contacto</a></li></ul>
   </div>
 </header>
@@ -41,7 +50,7 @@
     <p class="meta">Festival Latino Villa de Teror</p>
   </div>
 </section>
-<section class="seccion rosa" aria-label="Listado de noticias">
+<section class="seccion rosa" aria-label="Noticias">
   <div class="contenedor"><div class="noticias"><a class="noticia aparece" href="/noticias/mas-de-5000-personas-30-aniversario.html">
   <img src="/img/carteles/banner-30-800.webp" srcset="/img/carteles/banner-30-800.webp 800w, /img/carteles/banner-30-1600.webp 1600w" sizes="(max-width:620px) 100vw, (max-width:980px) 50vw, 380px" alt="Cartel del 30.º Festival Latino Villa de Teror" loading="lazy" decoding="async">
   <div class="noticia-cuerpo">
@@ -100,7 +109,7 @@
     </div>
     <div class="pie-base">
       <span>© <span id="anio">2026</span> Ayuntamiento de Teror · Festival Latino Villa de Teror</span>
-      <span><a href="/aviso-legal.html">Aviso legal</a> · <a href="/privacidad.html">Privacidad</a> · <a href="/cookies.html">Cookies</a></span>
+      <span><a href="/aviso-legal.html" hreflang="es">Aviso legal</a> · <a href="/privacidad.html" hreflang="es">Privacidad</a> · <a href="/cookies.html" hreflang="es">Cookies</a></span>
     </div>
   </div>
 </footer>

@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
-"""Genera las páginas HTML de la web del Festival Latino Villa de Teror.
+"""Genera las páginas HTML de la web del Festival Latino Villa de Teror
+en español (raíz), inglés (/en/) y francés (/fr/).
 
 Uso:  python3 scripts/generar.py
-Los textos de las noticias están en scripts/noticias.py. El resultado son
-ficheros .html estáticos en la raíz del repositorio (lo que publica Cloudflare).
+- Textos de la web:            scripts/textos.py
+- Noticias (en español):       scripts/noticias.py
+- Traducciones de noticias:    scripts/noticias_traducidas.py
+El resultado son ficheros .html estáticos (lo que publica Cloudflare).
+No edites los .html a mano: se sobrescriben.
 """
 import html
 import json
@@ -12,50 +16,33 @@ import sys
 
 RAIZ = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RAIZ / "scripts"))
+from iconos import CLAVE, ICO  # noqa: E402
 from noticias import NOTICIAS  # noqa: E402
+from noticias_traducidas import TRADUCCIONES  # noqa: E402
+from textos import IDIOMAS, MESES, RUTAS, T  # noqa: E402
 
 DOMINIO = "https://festivallatinoteror.es"
 EMAIL = "festivallatinoteror@gmail.com"
 EMAIL_PRENSA = "prensa@teror.es"
 INSTAGRAM = "https://www.instagram.com/flvteror/"
 FACEBOOK = "https://www.facebook.com/flvteror"
-MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio",
-         "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
-
-# ---------------------------------------------------------------- iconos
-ICO = {
-    "cal": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>',
-    "pin": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
-    "ticket": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8a2 2 0 0 0 0 4v4h18v-4a2 2 0 0 1 0-4V4H3z" transform="translate(0 2)"/><path d="M14 6v12" stroke-dasharray="2 2.5"/></svg>',
-    "flecha": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
-    "mic": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4M8 22h8"/></svg>',
-    "baile": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="4" r="2"/><circle cx="16" cy="5" r="2"/><path d="M9 6v6l-3 4M9 12l3 3v6M16 7l-1 5 3 3v6M15 12l-3-2"/></svg>',
-    "abierto": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="7" r="3"/><circle cx="17" cy="8" r="2.5"/><path d="M2 21v-2a5 5 0 0 1 10 0v2M13 21v-1.5a4 4 0 0 1 8 0V21"/></svg>',
-    "huella": '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><ellipse cx="6" cy="10" rx="2" ry="2.6"/><ellipse cx="10" cy="6" rx="2" ry="2.6"/><ellipse cx="14.5" cy="6" rx="2" ry="2.6"/><ellipse cx="18.5" cy="10" rx="2" ry="2.6"/><path d="M12 11.5c-3 0-6 3.8-6 6.3 0 1.6 1.3 2.4 3 2.1 1.2-.2 2-.6 3-.6s1.8.4 3 .6c1.7.3 3-.5 3-2.1 0-2.5-3-6.3-6-6.3z"/></svg>',
-    "bus": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="15" rx="3"/><path d="M4 11h16M8 21v-3M16 21v-3"/><circle cx="8" cy="14.5" r=".8" fill="currentColor"/><circle cx="16" cy="14.5" r=".8" fill="currentColor"/></svg>',
-    "gota": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3s6 6.6 6 11a6 6 0 0 1-12 0c0-4.4 6-11 6-11z"/><path d="M9.5 15a2.5 2.5 0 0 0 2.5 2.5"/></svg>',
-    "recicla": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 19H4.8a1.8 1.8 0 0 1-1.6-2.7l1.6-2.8M11 19h8.2a1.8 1.8 0 0 0 1.6-2.7l-1.2-2.1M14 16l-3 3 3 3M8.5 6.5l1.9-3.2a1.8 1.8 0 0 1 3.2 0l3.8 6.6M6 6.9l4 .6-.6 4"/></svg>',
-    "manos": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>',
-    "mail": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>',
-    "ig": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>',
-    "fb": '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.5-1.5h1.6V4.4a21 21 0 0 0-2.3-.1c-2.3 0-3.8 1.4-3.8 3.9v2.3H7.9v3h2.6V21z"/></svg>',
-    "menu": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
-}
-
-CLAVE = '<div class="clave" aria-hidden="true"><i class="on"></i><i></i><i></i><i class="on"></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i><i class="on"></i><i></i><i class="on"></i><i></i><i></i><i></i></div>'
 
 
 def esc(t):
     return html.escape(t, quote=True)
 
 
-def fecha_larga(iso):
+def fecha_larga(iso, lang):
     a, m, d = iso.split("-")
-    return f"{int(d)} de {MESES[int(m) - 1]} de {a}"
+    mes = MESES[lang][int(m) - 1]
+    if lang == "en":
+        return f"{int(d)} {mes} {a}"
+    if lang == "fr":
+        return f"{int(d)} {mes} {a}"
+    return f"{int(d)} de {mes} de {a}"
 
 
 def img(ruta, alt, anchos, sizes, clase="", carga="lazy", prioridad=False):
-    """<img> WebP con srcset. ruta sin sufijo: img/fotos/plaza -> plaza-800.webp"""
     srcset = ", ".join(f"/{ruta}-{w}.webp {w}w" for w in anchos)
     extra = ' fetchpriority="high"' if prioridad else ""
     c = f' class="{clase}"' if clase else ""
@@ -63,69 +50,95 @@ def img(ruta, alt, anchos, sizes, clase="", carga="lazy", prioridad=False):
             f'alt="{esc(alt)}" loading="{carga}" decoding="async"{extra}{c}>')
 
 
+def noticia_en(n, lang):
+    """La noticia con los campos traducidos al idioma (o en español si no hay traducción)."""
+    if lang == "es":
+        return n
+    tr = TRADUCCIONES.get(n["slug"], {}).get(lang)
+    return {**n, **tr} if tr else n
+
+
+def url_noticia(slug, lang):
+    return f'{RUTAS[lang]["noticias"]}{slug}.html'
+
+
 # ---------------------------------------------------------------- plantilla
-MENU = [("/#edicion-30", "La 30.ª edición", "inicio"),
-        ("/noticias/", "Noticias", "noticias"),
-        ("/#ediciones", "Ediciones anteriores", "inicio"),
-        ("/#sostenibilidad", "Sostenibilidad", "inicio"),
-        ("/#teror", "Teror", "inicio"),
-        ("/#contacto", "Contacto", "inicio")]
-
-
-def cabecera(seccion):
+def cabecera(lang, seccion, alternas):
+    t, base = T[lang], RUTAS[lang]["base"]
+    hrefs = [f"{base}#edicion-30", RUTAS[lang]["noticias"], f"{base}#ediciones",
+             f"{base}#sostenibilidad", f"{base}#teror", f"{base}#contacto"]
     items = []
-    for href, texto, sec in MENU:
-        cur = ' aria-current="page"' if (seccion == "noticias" and sec == "noticias") else ""
+    for i, (href, texto) in enumerate(zip(hrefs, t["menu"])):
+        cur = ' aria-current="page"' if (seccion == "noticias" and i == 1) else ""
         items.append(f'<li><a href="{href}"{cur}>{texto}</a></li>')
-    return f'''<a class="saltar" href="#contenido">Saltar al contenido</a>
+    idiomas = []
+    for l in IDIOMAS:
+        if l == lang:
+            idiomas.append(f'<li><span aria-current="true" lang="{l}" title="{T[l]["nombre_idioma"]}">{T[l]["corto"]}</span></li>')
+        else:
+            idiomas.append(f'<li><a href="{alternas[l]}" hreflang="{l}" lang="{l}" title="{T[l]["nombre_idioma"]}">{T[l]["corto"]}</a></li>')
+    return f'''<a class="saltar" href="#contenido">{t["saltar"]}</a>
 <header class="nav">
   <div class="contenedor">
-    <a class="marca" href="/" aria-label="Festival Latino Villa de Teror, ir al inicio"><span class="marca-num" aria-hidden="true">30</span><span>Festival Latino<small>Villa de Teror</small></span></a>
-    <button class="boton-menu" type="button" aria-controls="menu" aria-expanded="false"><span class="visualmente-oculto">Abrir menú</span>{ICO["menu"]}</button>
+    <a class="marca" href="{base}" aria-label="{esc(t["ir_inicio"])}"><span class="marca-num" aria-hidden="true">30</span><span>Festival Latino<small>Villa de Teror</small></span></a>
+    <div class="nav-derecha">
+      <ul class="idiomas" aria-label="{t["idioma"]}">{"".join(idiomas)}</ul>
+      <button class="boton-menu" type="button" aria-controls="menu" aria-expanded="false"><span class="visualmente-oculto">{t["abrir_menu"]}</span>{ICO["menu"]}</button>
+    </div>
     <ul class="menu" id="menu">{"".join(items)}</ul>
   </div>
 </header>'''
 
 
-def pie():
+def pie(lang):
+    t = T[lang]
+    nota = t["legal_nota"]
+    leg = t["legal"]
     return f'''<footer class="pie">
   <div class="contenedor">
     <div class="pie-arriba">
       <div class="pie-org">
         <img src="/img/logos/ayuntamiento-teror.webp" alt="Ayuntamiento de Teror" width="151" height="80" loading="lazy">
-        <span>Organiza el Ayuntamiento de Teror,<br>Concejalía de Festejos.</span>
+        <span>{t["pie_org"]}</span>
       </div>
       <div class="pie-redes">
-        <a href="{INSTAGRAM}" rel="noopener" aria-label="Instagram del Festival Latino Villa de Teror">{ICO["ig"]}</a>
-        <a href="{FACEBOOK}" rel="noopener" aria-label="Facebook del Festival Latino Villa de Teror">{ICO["fb"]}</a>
-        <a href="mailto:{EMAIL}" aria-label="Escribir un email al festival">{ICO["mail"]}</a>
+        <a href="{INSTAGRAM}" rel="noopener" aria-label="{esc(t["pie_ig"])}">{ICO["ig"]}</a>
+        <a href="{FACEBOOK}" rel="noopener" aria-label="{esc(t["pie_fb"])}">{ICO["fb"]}</a>
+        <a href="mailto:{EMAIL}" aria-label="{esc(t["pie_mail"])}">{ICO["mail"]}</a>
       </div>
     </div>
     <div class="pie-base">
       <span>© <span id="anio">2026</span> Ayuntamiento de Teror · Festival Latino Villa de Teror</span>
-      <span><a href="/aviso-legal.html">Aviso legal</a> · <a href="/privacidad.html">Privacidad</a> · <a href="/cookies.html">Cookies</a></span>
+      <span><a href="/aviso-legal.html" hreflang="es">{leg[0]}</a> · <a href="/privacidad.html" hreflang="es">{leg[1]}</a> · <a href="/cookies.html" hreflang="es">{leg[2]}</a>{nota}</span>
     </div>
   </div>
 </footer>
 <script src="/js/main.js" defer></script>'''
 
 
-def pagina(titulo, descripcion, ruta, cuerpo, seccion="inicio", og_img="/img/og-festival-latino-teror.jpg",
-           tipo="website", extra_head=""):
+def pagina(lang, titulo, descripcion, ruta, cuerpo, alternas, seccion="inicio",
+           og_img="/img/og-festival-latino-teror.jpg", tipo="website", extra_head=""):
     canon = DOMINIO + ruta
+    hreflang = "".join(f'<link rel="alternate" hreflang="{l}" href="{DOMINIO}{alternas[l]}">\n' for l in IDIOMAS)
+    if len(set(alternas.values())) > 1:
+        hreflang += f'<link rel="alternate" hreflang="x-default" href="{DOMINIO}{alternas["es"]}">\n'
+    else:
+        hreflang = ""
+    otros_locales = "".join(f'<meta property="og:locale:alternate" content="{T[l]["locale"]}">\n'
+                            for l in IDIOMAS if l != lang) if hreflang else ""
     return f'''<!doctype html>
-<html lang="es" class="sin-js">
+<html lang="{lang}" class="sin-js">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{esc(titulo)}</title>
 <meta name="description" content="{esc(descripcion)}">
 <link rel="canonical" href="{canon}">
-<meta name="theme-color" content="#2a0716">
+{hreflang}<meta name="theme-color" content="#2a0716">
 <meta property="og:type" content="{tipo}">
 <meta property="og:site_name" content="Festival Latino Villa de Teror">
-<meta property="og:locale" content="es_ES">
-<meta property="og:title" content="{esc(titulo)}">
+<meta property="og:locale" content="{T[lang]["locale"]}">
+{otros_locales}<meta property="og:title" content="{esc(titulo)}">
 <meta property="og:description" content="{esc(descripcion)}">
 <meta property="og:url" content="{canon}">
 <meta property="og:image" content="{DOMINIO}{og_img}">
@@ -139,72 +152,84 @@ def pagina(titulo, descripcion, ruta, cuerpo, seccion="inicio", og_img="/img/og-
 <link rel="stylesheet" href="/css/estilos.css">
 {extra_head}</head>
 <body>
-{cabecera(seccion)}
+{cabecera(lang, seccion, alternas)}
 <main id="contenido">
 {cuerpo}
 </main>
-{pie()}
+{pie(lang)}
 </body>
 </html>
 '''
 
 
-def tarjeta_noticia(n):
-    return f'''<a class="noticia aparece" href="/noticias/{n["slug"]}.html">
+def tarjeta_noticia(n, lang):
+    n = noticia_en(n, lang)
+    return f'''<a class="noticia aparece" href="{url_noticia(n["slug"], lang)}">
   {img(n["imagen"], n["imagen_alt"], n["anchos"], "(max-width:620px) 100vw, (max-width:980px) 50vw, 380px")}
   <div class="noticia-cuerpo">
-    <time datetime="{n["fecha"]}">{fecha_larga(n["fecha"])}</time>
+    <time datetime="{n["fecha"]}">{fecha_larga(n["fecha"], lang)}</time>
     <h3>{esc(n["titulo"])}</h3>
     <p>{esc(n["resumen"])}</p>
-    <span class="leer">Leer noticia →</span>
+    <span class="leer">{T[lang]["leer"]}</span>
   </div>
 </a>'''
 
 
 # ---------------------------------------------------------------- inicio
-def inicio():
-    # Archivo de carteles: (año, edición, imagen, anchos, cabezas de cartel, enlace)
-    archivo = [
-        ("2026", "XXX", "img/carteles/cartel-30", [500, 1000], "Tony y Mimy Succar · Tromboranga", "/noticias/mas-de-5000-personas-30-aniversario.html"),
-        ("2025", "XXIX", "img/carteles/cartel-29", [400, 800], "José Alberto «El Canario» · Estrellas de Buena Vista y Más", "/noticias/29-edicion-jose-alberto-el-canario.html"),
-        ("2024", "XXVIII", "img/ediciones/edicion-1", [600, 1200], "Issac Delgado y su Orquesta · Los Troveros de Asieta", ""),
-        ("2023", "XXVII", "img/ediciones/edicion-2", [600, 1200], "Alain Pérez y La Orquesta · Compota de Manana", ""),
-        ("2022", "XXVI", "img/ediciones/edicion-3", [600, 1200], "Juan Formell y Los Van Van · Septeto Santiaguero", ""),
-        ("2019", "XXV", "img/ediciones/edicion-4", [600, 1200], "Mixael Cabrera &amp; su Team Barcelona", ""),
-        ("2018", "XXIV", "img/ediciones/edicion-5", [600, 1200], "Canarias Salsa Allstars", ""),
-        ("2017", "XXIII", "img/ediciones/edicion-6", [600, 1200], "NG2 · Iván «Cacú» y su Orquesta", ""),
-    ]
+# Archivo de carteles: (año, edición, imagen, anchos, cabezas de cartel, slug de noticia)
+ARCHIVO = [
+    ("2026", "XXX", "img/carteles/cartel-30", [500, 1000], "Tony &amp; Mimy Succar · Tromboranga", "mas-de-5000-personas-30-aniversario"),
+    ("2025", "XXIX", "img/carteles/cartel-29", [400, 800], "José Alberto «El Canario» · Estrellas de Buena Vista y Más", "29-edicion-jose-alberto-el-canario"),
+    ("2024", "XXVIII", "img/ediciones/edicion-1", [600, 1200], "Issac Delgado y su Orquesta · Los Troveros de Asieta", ""),
+    ("2023", "XXVII", "img/ediciones/edicion-2", [600, 1200], "Alain Pérez y La Orquesta · Compota de Manana", ""),
+    ("2022", "XXVI", "img/ediciones/edicion-3", [600, 1200], "Juan Formell y Los Van Van · Septeto Santiaguero", ""),
+    ("2019", "XXV", "img/ediciones/edicion-4", [600, 1200], "Mixael Cabrera &amp; su Team Barcelona", ""),
+    ("2018", "XXIV", "img/ediciones/edicion-5", [600, 1200], "Canarias Salsa Allstars", ""),
+    ("2017", "XXIII", "img/ediciones/edicion-6", [600, 1200], "NG2 · Iván «Cacú» y su Orquesta", ""),
+]
+
+ICONOS_RASGOS = ["mic", "baile", "abierto", "huella"]
+ICONOS_EJES = ["bus", "gota", "recicla", "manos"]
+
+
+def inicio(lang):
+    t, base = T[lang], RUTAS[lang]["base"]
+    alternas = {l: RUTAS[l]["base"] for l in IDIOMAS}
+
     galeria = ""
-    for anio, num, ruta, anchos, cabeza, enlace in archivo:
-        foto = img(ruta, f"Cartel del {num} Festival Latino Villa de Teror ({anio})", anchos, "(max-width:620px) 50vw, (max-width:980px) 33vw, 280px")
+    for anio, num, ruta, anchos, cabeza, slug in ARCHIVO:
+        foto = img(ruta, t["alt_cartel_ed"].format(num=num, anio=anio), anchos,
+                   "(max-width:620px) 50vw, (max-width:980px) 33vw, 280px")
         pie_txt = f'<span class="cartel-anio">{anio} · {num}</span><span class="cartel-cabeza">{cabeza}</span>'
-        if enlace:
-            galeria += f'<li class="aparece"><a href="{enlace}"><figure>{foto}<figcaption>{pie_txt}</figcaption></figure></a></li>'
-        else:
-            galeria += f'<li class="aparece"><figure>{foto}<figcaption>{pie_txt}</figcaption></figure></li>'
+        fig = f"<figure>{foto}<figcaption>{pie_txt}</figcaption></figure>"
+        galeria += f'<li class="aparece"><a href="{url_noticia(slug, lang)}">{fig}</a></li>' if slug else f'<li class="aparece">{fig}</li>'
 
-    ritmos = "".join(f"<span>{r}</span>" for r in
-                     ["Salsa", "Son", "Timba", "Bachata", "Kizomba", "Merengue", "Salsa brava", "Son cubano"])
-
-    noticias = "".join(tarjeta_noticia(n) for n in NOTICIAS[:3])
+    ritmos = "".join(f"<span>{r}</span>" for r in t["ritmos"])
+    cifras = "".join(f'<li class="cifra aparece"><strong>{a}</strong><span>{b}</span></li>' for a, b in t["cifras"])
+    dias = ""
+    for i, (cuando, h3, p, lista) in enumerate(t["dias"]):
+        clase = "dia destacado aparece" if i == 2 else "dia aparece"
+        lis = "".join(f"<li>{x}</li>" for x in lista)
+        dias += f'<article class="{clase}"><p class="dia-cuando">{cuando}</p><h3>{h3}</h3><p>{p}</p><ul>{lis}</ul></article>'
+    rasgos = "".join(f'<li class="rasgo aparece"><div class="icono">{ICO[ic]}</div><h3>{h}</h3><p>{p}</p></li>'
+                     for ic, (h, p) in zip(ICONOS_RASGOS, t["rasgos"]))
+    ejes = "".join(f'<li class="eje aparece">{ICO[ic]}<h3>{h}</h3><p>{p}</p></li>'
+                   for ic, (h, p) in zip(ICONOS_EJES, t["ejes"]))
+    noticias = "".join(tarjeta_noticia(n, lang) for n in NOTICIAS[:3])
 
     ld = {
-        "@context": "https://schema.org",
-        "@type": "Festival",
-        "name": "30.º Festival Latino Villa de Teror",
-        "startDate": "2026-07-20",
-        "endDate": "2026-07-25",
+        "@context": "https://schema.org", "@type": "Festival",
+        "name": "30.º Festival Latino Villa de Teror", "startDate": "2026-07-20", "endDate": "2026-07-25",
         "eventStatus": "https://schema.org/EventScheduled",
         "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
-        "isAccessibleForFree": True,
+        "isAccessibleForFree": True, "inLanguage": lang,
         "location": {"@type": "Place", "name": "Plaza de Sintes",
-                     "address": {"@type": "PostalAddress", "addressLocality": "Teror",
-                                 "postalCode": "35330", "addressRegion": "Las Palmas", "addressCountry": "ES"}},
+                     "address": {"@type": "PostalAddress", "addressLocality": "Teror", "postalCode": "35330",
+                                 "addressRegion": "Las Palmas", "addressCountry": "ES"}},
         "image": [DOMINIO + "/img/og-festival-latino-teror.jpg"],
-        "description": "30 años de salsa y música latina en la Plaza de Sintes de Teror, Gran Canaria. Entrada gratuita.",
+        "description": t["descripcion"],
         "organizer": {"@type": "Organization", "name": "Ayuntamiento de Teror", "url": "https://teror.es"},
-        "performer": [{"@type": "MusicGroup", "name": n} for n in
-                      ["Tony y Mimy Succar", "Tromboranga", "La Golosina"]],
+        "performer": [{"@type": "MusicGroup", "name": n} for n in ["Tony y Mimy Succar", "Tromboranga", "La Golosina"]],
     }
     extra = f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>\n'
 
@@ -212,22 +237,22 @@ def inicio():
 <section class="portada" aria-labelledby="titulo-portada">
   <div class="contenedor">
     <div class="portada-texto">
-      <p class="etiqueta">Plaza de Sintes · Teror · Gran Canaria</p>
-      <h1 class="titular" id="titulo-portada"><span class="fino">30 años de</span><span class="grande">Festival Latino</span><span class="villa">Villa de Teror</span></h1>
-      <p class="portada-lema">Tres décadas llevando la salsa, el son y la timba al corazón de la Villa Mariana. En julio de 2026 celebramos la 30.ª edición con más de 5.000 personas bailando en la plaza.</p>
+      <p class="etiqueta">{t["etiqueta"]}</p>
+      <h1 class="titular" id="titulo-portada"><span class="fino">{t["h1_fino"]}</span><span class="grande">Festival Latino</span><span class="villa">{t["h1_villa"]}</span></h1>
+      <p class="portada-lema">{t["lema"]}</p>
       <ul class="datos-portada">
-        <li>{ICO["cal"]} Del 20 al 25 de julio de 2026</li>
-        <li>{ICO["pin"]} Plaza de Sintes</li>
-        <li>{ICO["ticket"]} Entrada gratuita</li>
+        <li>{ICO["cal"]} {t["fechas"]}</li>
+        <li>{ICO["pin"]} {t["plaza"]}</li>
+        <li>{ICO["ticket"]} {t["gratis"]}</li>
       </ul>
       <div class="botones">
-        <a class="boton boton-primario" href="#edicion-30">Así fue la 30.ª edición {ICO["flecha"]}</a>
-        <a class="boton boton-borde" href="/noticias/">Noticias</a>
+        <a class="boton boton-primario" href="#edicion-30">{t["btn_edicion"]} {ICO["flecha"]}</a>
+        <a class="boton boton-borde" href="{RUTAS[lang]["noticias"]}">{t["btn_noticias"]}</a>
       </div>
     </div>
     <figure class="portada-cartel">
-      {img("img/carteles/cartel-30", "Cartel del 30.º Festival Latino Villa de Teror con Tony y Mimy Succar y Tromboranga", [500, 1000], "(max-width:880px) 90vw, 520px", carga="eager", prioridad=True)}
-      <div class="sello" aria-hidden="true"><div><strong>30</strong>ediciones</div></div>
+      {img("img/carteles/cartel-30", t["alt_cartel30"], [500, 1000], "(max-width:880px) 90vw, 520px", carga="eager", prioridad=True)}
+      <div class="sello" aria-hidden="true"><div><strong>30</strong>{t["sello"]}</div></div>
     </figure>
   </div>
 </section>
@@ -238,15 +263,10 @@ def inicio():
   <div class="contenedor">
     <div class="seccion-cabecera aparece">
       {CLAVE}
-      <h2 id="titulo-cifras">Una cita con <span class="acento">sabor</span> desde hace 30 años</h2>
-      <p>El Festival Latino Villa de Teror es una de las grandes citas del verano en Gran Canaria y parte de la identidad cultural del municipio. Música en directo, baile y ambiente familiar en la calle, sin entradas.</p>
+      <h2 id="titulo-cifras">{t["cifras_h2"]}</h2>
+      <p>{t["cifras_p"]}</p>
     </div>
-    <ul class="cifras">
-      <li class="cifra aparece"><strong>30</strong><span>ediciones celebradas en Teror</span></li>
-      <li class="cifra aparece"><strong>+5.000</strong><span>personas en la 30.ª edición</span></li>
-      <li class="cifra aparece"><strong>6</strong><span>días de festival, con talleres de baile toda la semana</span></li>
-      <li class="cifra aparece"><strong>0 €</strong><span>Todas las actividades son gratuitas</span></li>
-    </ul>
+    <ul class="cifras">{cifras}</ul>
   </div>
 </section>
 
@@ -254,32 +274,13 @@ def inicio():
   <div class="contenedor">
     <div class="seccion-cabecera aparece">
       {CLAVE}
-      <h2 id="titulo-edicion">Así fue la <span class="acento">30.ª edición</span></h2>
-      <p>Una semana entera de música y baile que creció día a día hasta la gran noche internacional del sábado 25 de julio de 2026.</p>
+      <h2 id="titulo-edicion">{t["ed_h2"]}</h2>
+      <p>{t["ed_p"]}</p>
     </div>
-    <div class="dias">
-      <article class="dia aparece">
-        <p class="dia-cuando">Lunes 20 – jueves 23</p>
-        <h3>Talleres de baile</h3>
-        <p>Clases gratuitas de salsa, bachata y otros ritmos latinos cada tarde en la Alameda de Pío XII, de 20:30 a 22:30 h, con Ancor y Ayose Domínguez, de la academia Paso a Paso Las Palmas.</p>
-        <ul><li>Salsa</li><li>Bachata</li><li>Alameda de Pío XII</li></ul>
-      </article>
-      <article class="dia aparece">
-        <p class="dia-cuando">Viernes 24 · desde las 11:00</p>
-        <h3>Edición Gran Canaria Joven</h3>
-        <p>Una jornada para el público joven con talleres, la exposición «Historia de la Salsa», proyecciones, pasacalles y stands de asociaciones. Con el apoyo de la Consejería de Educación y Juventud del Cabildo de Gran Canaria.</p>
-        <ul><li>Dos de Azúcar</li><li>Havana 500</li><li>Yet Garbey</li><li>Idel El Mulatito</li><li>DJ Ruymán Melián</li></ul>
-      </article>
-      <article class="dia destacado aparece">
-        <p class="dia-cuando">Sábado 25 · desde las 19:00</p>
-        <h3>Gala internacional</h3>
-        <p>Las academias de baile de Gran Canaria y La Golosina calentaron la plaza antes de Tony y Mimy Succar, llegados desde Miami con Kenyi Succar, y de Tromboranga, referente europeo de la salsa dura. Cerró la noche DJ Yotu.</p>
-        <ul><li>Tony y Mimy Succar</li><li>Tromboranga</li><li>La Golosina</li><li>Paso a Paso Las Palmas</li><li>DJ Yotu</li></ul>
-      </article>
-    </div>
+    <div class="dias">{dias}</div>
     <figure class="banner-cartel aparece">
-      {img("img/carteles/banner-30", "Cartel horizontal del 30.º Festival Latino Villa de Teror, sábado 25 de julio de 2026 en la Plaza de Sintes", [800, 1600], "(max-width:1180px) 100vw, 1180px")}
-      <figcaption>La gala del sábado contó con el patrocinio del Gobierno de Canarias a través de la marca «Islas Canarias» (Promotur Turismo Canarias).</figcaption>
+      {img("img/carteles/banner-30", t["alt_banner"], [800, 1600], "(max-width:1180px) 100vw, 1180px")}
+      <figcaption>{t["banner_pie"]}</figcaption>
     </figure>
   </div>
 </section>
@@ -288,15 +289,10 @@ def inicio():
   <div class="contenedor">
     <div class="seccion-cabecera aparece">
       {CLAVE}
-      <h2 id="titulo-experiencia">Un festival <span class="acento">en la calle</span></h2>
-      <p>Música latina de calidad para todos los públicos, en uno de los enclaves más bonitos de la isla.</p>
+      <h2 id="titulo-experiencia">{t["exp_h2"]}</h2>
+      <p>{t["exp_p"]}</p>
     </div>
-    <ul class="rasgos">
-      <li class="rasgo aparece"><div class="icono">{ICO["mic"]}</div><h3>Conciertos</h3><p>Música en directo de artistas locales, nacionales e internacionales.</p></li>
-      <li class="rasgo aparece"><div class="icono">{ICO["baile"]}</div><h3>Talleres y baile</h3><p>Clases, exhibiciones y actividades para que nadie se quede sin bailar.</p></li>
-      <li class="rasgo aparece"><div class="icono">{ICO["abierto"]}</div><h3>Gratis para todos</h3><p>Festival en la calle, sin entradas y pensado para toda la familia.</p></li>
-      <li class="rasgo aparece"><div class="icono">{ICO["huella"]}</div><h3>Pet friendly</h3><p>Puedes venir con tu mascota: hay zonas habilitadas.</p></li>
-    </ul>
+    <ul class="rasgos">{rasgos}</ul>
   </div>
 </section>
 
@@ -304,11 +300,11 @@ def inicio():
   <div class="contenedor">
     <div class="seccion-cabecera aparece">
       {CLAVE}
-      <h2 id="titulo-noticias">Actualidad</h2>
-      <p>Las últimas noticias del Festival Latino Villa de Teror.</p>
+      <h2 id="titulo-noticias">{t["act_h2"]}</h2>
+      <p>{t["act_p"]}</p>
     </div>
     <div class="noticias">{noticias}</div>
-    <div class="ver-todo"><a class="boton boton-vino" href="/noticias/">Ver todas las noticias {ICO["flecha"]}</a></div>
+    <div class="ver-todo"><a class="boton boton-vino" href="{RUTAS[lang]["noticias"]}">{t["ver_todas"]} {ICO["flecha"]}</a></div>
   </div>
 </section>
 
@@ -316,11 +312,11 @@ def inicio():
   <div class="contenedor">
     <div class="seccion-cabecera aparece">
       {CLAVE}
-      <h2 id="titulo-ediciones">Ediciones <span class="acento">anteriores</span></h2>
-      <p>Treinta veranos de ritmo en la Plaza de Sintes. De Los Van Van a Issac Delgado, de José Alberto «El Canario» a Tony y Mimy Succar: así se han anunciado las últimas ediciones.</p>
+      <h2 id="titulo-ediciones">{t["ant_h2"]}</h2>
+      <p>{t["ant_p"]}</p>
     </div>
     <ul class="carteles">{galeria}</ul>
-    <p class="nota-archivo">2020 y 2021 no hubo festival por la pandemia. ¿Tienes carteles o fotos de las primeras ediciones? Escríbenos a <a href="mailto:{EMAIL}">{EMAIL}</a>.</p>
+    <p class="nota-archivo">{t["nota_archivo"]} <a href="mailto:{EMAIL}">{EMAIL}</a>.</p>
   </div>
 </section>
 
@@ -328,31 +324,26 @@ def inicio():
   <div class="contenedor">
     <div class="seccion-cabecera aparece">
       {CLAVE}
-      <h2 id="titulo-sostenibilidad">Juntos por un festival <span class="acento">más verde</span></h2>
-      <p>El Plan de Sostenibilidad del Festival Latino de Teror busca reducir el impacto ambiental del evento y, al mismo tiempo, apoyar la inclusión social y la economía local. Un festival que también cuida su entorno.</p>
+      <h2 id="titulo-sostenibilidad">{t["sos_h2"]}</h2>
+      <p>{t["sos_p"]}</p>
     </div>
-    <ul class="ejes">
-      <li class="eje aparece">{ICO["bus"]}<h3>Movilidad sostenible</h3><p>Fomento del transporte público y de los desplazamientos sostenibles para llegar a Teror.</p></li>
-      <li class="eje aparece">{ICO["gota"]}<h3>Agua y energía</h3><p>Ahorro en el consumo de agua y energía durante el montaje y los días de festival.</p></li>
-      <li class="eje aparece">{ICO["recicla"]}<h3>Residuos</h3><p>Reducción de residuos, reutilización de infraestructuras y economía circular.</p></li>
-      <li class="eje aparece">{ICO["manos"]}<h3>Inclusión</h3><p>Accesibilidad, condiciones laborales justas, apoyo al comercio local y concienciación del público.</p></li>
-    </ul>
+    <ul class="ejes">{ejes}</ul>
   </div>
 </section>
 
 <section class="seccion rosa" id="teror" aria-labelledby="titulo-teror">
   <div class="contenedor dos-col">
     <figure class="teror-foto aparece">
-      {img("img/fotos/teror", "Teror, Gran Canaria", [800, 1400], "(max-width:880px) 100vw, 560px")}
+      {img("img/fotos/teror", t["alt_teror"], [800, 1400], "(max-width:880px) 100vw, 560px")}
     </figure>
     <div class="aparece">
       {CLAVE}
-      <h2 id="titulo-teror" style="font-size:clamp(2.6rem,6vw,4.4rem)">Mucho que ver: <span class="acento">Teror</span></h2>
-      <p>Teror combina historia, arquitectura tradicional y naturaleza a pocos minutos de Las Palmas de Gran Canaria. La Basílica de Nuestra Señora del Pino, sus calles de balcones canarios, sus montañas y su mercado hacen de la Villa un lugar para pasar unas horas o unos días con calma.</p>
-      <p>Aprovecha el festival para quedarte a conocerla.</p>
+      <h2 id="titulo-teror" style="font-size:clamp(2.6rem,6vw,4.4rem)">{t["teror_h2"]}</h2>
+      <p>{t["teror_p"]}</p>
+      <p>{t["teror_p2"]}</p>
       <div class="enlaces-turismo">
-        <a class="boton boton-vino" href="https://turismo.teror.es/" rel="noopener">Turismo de Teror {ICO["flecha"]}</a>
-        <a class="boton boton-vino" href="https://www.holaislascanarias.com/" rel="noopener">Islas Canarias {ICO["flecha"]}</a>
+        <a class="boton boton-vino" href="https://turismo.teror.es/" rel="noopener">{t["turismo_teror"]} {ICO["flecha"]}</a>
+        <a class="boton boton-vino" href="https://www.holaislascanarias.com/" rel="noopener">{t["islas"]} {ICO["flecha"]}</a>
       </div>
     </div>
   </div>
@@ -363,12 +354,12 @@ def inicio():
     <div class="contacto-caja aparece">
       <div>
         {CLAVE}
-        <h2 id="titulo-contacto">¿Hablamos?</h2>
-        <p>Para información sobre el festival, propuestas artísticas o colaboración, escríbenos. Para prensa, contacta con el gabinete del Ayuntamiento de Teror.</p>
+        <h2 id="titulo-contacto">{t["contacto_h2"]}</h2>
+        <p>{t["contacto_p"]}</p>
       </div>
       <ul class="contacto-lista">
-        <li><a href="mailto:{EMAIL}">{ICO["mail"]}<span><small>Festival</small>{EMAIL}</span></a></li>
-        <li><a href="mailto:{EMAIL_PRENSA}">{ICO["mail"]}<span><small>Prensa</small>{EMAIL_PRENSA}</span></a></li>
+        <li><a href="mailto:{EMAIL}">{ICO["mail"]}<span><small>{t["c_festival"]}</small>{EMAIL}</span></a></li>
+        <li><a href="mailto:{EMAIL_PRENSA}">{ICO["mail"]}<span><small>{t["c_prensa"]}</small>{EMAIL_PRENSA}</span></a></li>
         <li><a href="{INSTAGRAM}" rel="noopener">{ICO["ig"]}<span><small>Instagram</small>@flvteror</span></a></li>
         <li><a href="{FACEBOOK}" rel="noopener">{ICO["fb"]}<span><small>Facebook</small>flvteror</span></a></li>
       </ul>
@@ -378,7 +369,7 @@ def inicio():
 
 <section class="colaboran" aria-labelledby="titulo-colaboran">
   <div class="contenedor">
-    <h2 id="titulo-colaboran">Organiza y colaboran</h2>
+    <h2 id="titulo-colaboran">{t["colaboran"]}</h2>
     <ul class="logos">
       <li class="logo-ayto"><a href="https://teror.es/" rel="noopener"><img src="/img/logos/ayuntamiento-teror.webp" alt="Ayuntamiento de Teror" loading="lazy" width="151" height="80"></a></li>
       <li><a href="https://turismodeislascanarias.com/" rel="noopener"><img src="/img/logos/islas-canarias.webp" alt="Islas Canarias, Latitud de vida · Promotur Turismo de Islas Canarias" loading="lazy"></a></li>
@@ -389,41 +380,43 @@ def inicio():
     </ul>
   </div>
 </section>'''
-    return pagina("Festival Latino Villa de Teror · 30 años de salsa en Gran Canaria",
-                  "El Festival Latino Villa de Teror celebra 30 años de salsa, son y música latina en la Plaza de Sintes de Teror (Gran Canaria). Conciertos, talleres de baile y entrada gratuita.",
-                  "/", cuerpo, extra_head=extra)
+    return pagina(lang, t["titulo"], t["descripcion"], base, cuerpo, alternas, extra_head=extra)
 
 
 # ---------------------------------------------------------------- noticias
-def listado_noticias():
-    tarjetas = "".join(tarjeta_noticia(n) for n in NOTICIAS)
+def listado_noticias(lang):
+    t = T[lang]
+    alternas = {l: RUTAS[l]["noticias"] for l in IDIOMAS}
+    tarjetas = "".join(tarjeta_noticia(n, lang) for n in NOTICIAS)
     cuerpo = f'''
 <section class="cabecera-pagina">
   <div class="contenedor">
-    <nav class="migas" aria-label="Ruta"><a href="/">Inicio</a> / Noticias</nav>
-    <h1>Noticias</h1>
+    <nav class="migas" aria-label="{t["ruta"]}"><a href="{RUTAS[lang]["base"]}">{t["inicio"]}</a> / {t["noticias"]}</nav>
+    <h1>{t["noticias"]}</h1>
     <p class="meta">Festival Latino Villa de Teror</p>
   </div>
 </section>
-<section class="seccion rosa" aria-label="Listado de noticias">
+<section class="seccion rosa" aria-label="{t["noticias"]}">
   <div class="contenedor"><div class="noticias">{tarjetas}</div></div>
 </section>'''
-    return pagina("Noticias · Festival Latino Villa de Teror",
-                  "Noticias, carteles y balances del Festival Latino Villa de Teror, en la Plaza de Sintes de Teror (Gran Canaria).",
-                  "/noticias/", cuerpo, seccion="noticias")
+    return pagina(lang, t["noticias_titulo"], t["noticias_desc"], RUTAS[lang]["noticias"], cuerpo, alternas,
+                  seccion="noticias")
 
 
-def noticia(n):
-    ld = {"@context": "https://schema.org", "@type": "NewsArticle", "headline": n["titulo"],
-          "datePublished": n["fecha"], "image": [f"{DOMINIO}/{n['imagen']}-{n['anchos'][-1]}.webp"],
+def noticia(n_es, lang):
+    t, n = T[lang], noticia_en(n_es, lang)
+    alternas = {l: url_noticia(n_es["slug"], l) for l in IDIOMAS}
+    imagen_grande = f'/{n["imagen"]}-{n["anchos"][-1]}.webp'
+    ld = {"@context": "https://schema.org", "@type": "NewsArticle", "headline": n["titulo"], "inLanguage": lang,
+          "datePublished": n["fecha"], "image": [DOMINIO + imagen_grande],
           "author": {"@type": "Organization", "name": "Ayuntamiento de Teror"},
           "publisher": {"@type": "Organization", "name": "Ayuntamiento de Teror"}}
     extra = f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>\n'
     cuerpo = f'''
 <section class="cabecera-pagina">
   <div class="contenedor">
-    <nav class="migas" aria-label="Ruta"><a href="/">Inicio</a> / <a href="/noticias/">Noticias</a></nav>
-    <p class="meta"><time datetime="{n["fecha"]}">{fecha_larga(n["fecha"])}</time> · Prensa Teror</p>
+    <nav class="migas" aria-label="{t["ruta"]}"><a href="{RUTAS[lang]["base"]}">{t["inicio"]}</a> / <a href="{RUTAS[lang]["noticias"]}">{t["noticias"]}</a></nav>
+    <p class="meta"><time datetime="{n["fecha"]}">{fecha_larga(n["fecha"], lang)}</time> · {t["prensa_teror"]}</p>
     <h1>{esc(n["titulo"])}</h1>
   </div>
 </section>
@@ -431,15 +424,15 @@ def noticia(n):
   <div class="contenedor">
     <figure class="articulo-imagen">{img(n["imagen"], n["imagen_alt"], n["anchos"], "(max-width:760px) 100vw, 760px", carga="eager", prioridad=True)}</figure>
     {n["cuerpo"]}
-    <a class="boton boton-vino volver" href="/noticias/">← Todas las noticias</a>
+    <a class="boton boton-vino volver" href="{RUTAS[lang]["noticias"]}">{t["todas"]}</a>
   </div>
 </article>'''
-    return pagina(f'{n["titulo"]} · Festival Latino Villa de Teror', n["resumen"],
-                  f'/noticias/{n["slug"]}.html', cuerpo, seccion="noticias",
-                  og_img=f'/{n["imagen"]}-{n["anchos"][-1]}.webp', tipo="article", extra_head=extra)
+    return pagina(lang, f'{n["titulo"]} · Festival Latino Villa de Teror', n["resumen"],
+                  url_noticia(n_es["slug"], lang), cuerpo, alternas, seccion="noticias",
+                  og_img=imagen_grande, tipo="article", extra_head=extra)
 
 
-# ---------------------------------------------------------------- legales
+# ---------------------------------------------------------------- legales (solo en español)
 TITULAR = '''<table>
 <tr><th scope="row">Titular</th><td>Ayuntamiento de Teror</td></tr>
 <tr><th scope="row">CIF</th><td>P3502700B</td></tr>
@@ -448,16 +441,6 @@ TITULAR = '''<table>
 <tr><th scope="row">Email</th><td><a href="mailto:ayuntamiento@teror.es">ayuntamiento@teror.es</a></td></tr>
 <tr><th scope="row">Sitio web</th><td>festivallatinoteror.es</td></tr>
 </table>'''
-
-
-def legal(slug, titulo, descripcion, contenido):
-    cuerpo = f'''<section class="legal"><div class="contenedor">
-<h1>{titulo}</h1>
-<p class="actualizado">Última actualización: noviembre de 2026.</p>
-{contenido}
-</div></section>'''
-    return pagina(f"{titulo} · Festival Latino Villa de Teror", descripcion, f"/{slug}.html", cuerpo)
-
 
 AVISO = f'''<h2>1. Datos del titular</h2>
 <p>En cumplimiento del artículo 10 de la Ley 34/2002, de 11 de julio, de Servicios de la Sociedad de la Información y de Comercio Electrónico (LSSI-CE), se informa de los datos del titular de este sitio web:</p>
@@ -470,7 +453,7 @@ AVISO = f'''<h2>1. Datos del titular</h2>
 <p>Los textos, carteles, fotografías, logotipos y diseño de esta web pertenecen al Ayuntamiento de Teror o a terceros que han autorizado su uso. Queda prohibida su reproducción, distribución o transformación sin autorización expresa, salvo para uso personal y privado o para la difusión informativa del festival citando la fuente.</p>
 <p>Las marcas y logotipos de las entidades colaboradoras (Gobierno de Canarias, Promotur Turismo de Islas Canarias, Cabildo de Gran Canaria y patrocinadores) pertenecen a sus respectivos titulares.</p>
 <h2>5. Responsabilidad</h2>
-<p>El Ayuntamiento de Teror procura que la información publicada, incluidas fechas, horarios y artistas, sea correcta y esté actualizada, pero puede haber cambios de programación ajenos a su voluntad. La web contiene enlaces a sitios de terceros, de cuyos contenidos no se hace responsable.</p>
+<p>El Ayuntamiento de Teror procura que la información publicada, incluidas fechas, horarios y artistas, sea correcta y esté actualizada, pero puede haber cambios de programación ajenos a su voluntad. Las versiones en inglés y francés son traducciones informativas; en caso de discrepancia prevalece la versión en español. La web contiene enlaces a sitios de terceros, de cuyos contenidos no se hace responsable.</p>
 <h2>6. Protección de datos y cookies</h2>
 <p>El tratamiento de datos personales se explica en la <a href="/privacidad.html">política de privacidad</a> y el uso de cookies en la <a href="/cookies.html">política de cookies</a>.</p>
 <h2>7. Legislación aplicable</h2>
@@ -501,30 +484,48 @@ COOKIES = '''<p>Esta web no utiliza cookies propias ni de terceros con fines de 
 <p>Puede borrar o bloquear las cookies desde la configuración de su navegador.</p>'''
 
 
+def legal(slug, titulo, descripcion, contenido):
+    ruta = f"/{slug}.html"
+    alternas = {l: ruta for l in IDIOMAS}
+    cuerpo = f'''<section class="legal"><div class="contenedor">
+<h1>{titulo}</h1>
+<p class="actualizado">Última actualización: noviembre de 2026.</p>
+{contenido}
+</div></section>'''
+    return pagina("es", f"{titulo} · Festival Latino Villa de Teror", descripcion, ruta, cuerpo, alternas)
+
+
 def no_encontrada():
-    cuerpo = f'''<section class="cabecera-pagina" style="min-height:60vh;display:flex;align-items:center">
-  <div class="contenedor">
-    <p class="meta">Error 404</p>
-    <h1>Esta página se fue a bailar</h1>
-    <p>La dirección que busca no existe o ha cambiado con la nueva web.</p>
-    <div class="botones" style="margin-top:22px"><a class="boton boton-primario" href="/">Volver al inicio {ICO["flecha"]}</a><a class="boton boton-borde" href="/noticias/">Noticias</a></div>
-  </div>
-</section>'''
-    return pagina("Página no encontrada · Festival Latino Villa de Teror",
-                  "La página que busca no existe.", "/404.html", cuerpo)
+    alternas = {l: RUTAS[l]["base"] for l in IDIOMAS}
+    bloques = "".join(
+        f'<div lang="{l}" style="margin-bottom:22px"><p class="meta">Error 404</p>'
+        f'<h1 style="margin-bottom:.3em">{T[l]["e404_titulo"]}</h1><p>{T[l]["e404_p"]}</p>'
+        f'<a class="boton boton-primario" href="{RUTAS[l]["base"]}">{T[l]["e404_volver"]} {ICO["flecha"]}</a></div>'
+        for l in IDIOMAS)
+    cuerpo = f'<section class="cabecera-pagina" style="min-height:60vh"><div class="contenedor">{bloques}</div></section>'
+    return pagina("es", "Página no encontrada · Festival Latino Villa de Teror", "La página que busca no existe.",
+                  "/404.html", cuerpo, alternas)
 
 
 def escribir(ruta, texto):
-    p = RAIZ / ruta
+    p = RAIZ / ruta.lstrip("/")
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(texto, encoding="utf-8")
 
 
 def main():
-    escribir("index.html", inicio())
-    escribir("noticias/index.html", listado_noticias())
-    for n in NOTICIAS:
-        escribir(f"noticias/{n['slug']}.html", noticia(n))
+    paginas = 0
+    urls = []
+    for lang in IDIOMAS:
+        base, carpeta = RUTAS[lang]["base"], RUTAS[lang]["noticias"]
+        escribir(base + "index.html", inicio(lang))
+        escribir(carpeta + "index.html", listado_noticias(lang))
+        urls += [base, carpeta]
+        for n in NOTICIAS:
+            escribir(url_noticia(n["slug"], lang), noticia(n, lang))
+            urls.append(url_noticia(n["slug"], lang))
+        paginas += 2 + len(NOTICIAS)
+
     escribir("aviso-legal.html", legal("aviso-legal", "Aviso legal",
              "Aviso legal de la web del Festival Latino Villa de Teror: datos del titular, el Ayuntamiento de Teror.", AVISO))
     escribir("privacidad.html", legal("privacidad", "Política de privacidad",
@@ -532,16 +533,16 @@ def main():
     escribir("cookies.html", legal("cookies", "Política de cookies",
              "Uso de cookies en la web del Festival Latino Villa de Teror.", COOKIES))
     escribir("404.html", no_encontrada())
+    urls += ["/aviso-legal.html", "/privacidad.html", "/cookies.html"]
+    paginas += 4
 
-    urls = ["/", "/noticias/"] + [f"/noticias/{n['slug']}.html" for n in NOTICIAS] + \
-           ["/aviso-legal.html", "/privacidad.html", "/cookies.html"]
     sm = ['<?xml version="1.0" encoding="UTF-8"?>',
           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     sm += [f"  <url><loc>{DOMINIO}{u}</loc></url>" for u in urls]
     sm.append("</urlset>")
     escribir("sitemap.xml", "\n".join(sm) + "\n")
     escribir("robots.txt", f"User-agent: *\nAllow: /\n\nSitemap: {DOMINIO}/sitemap.xml\n")
-    print("Generadas", 6 + len(NOTICIAS), "páginas")
+    print("Generadas", paginas, "páginas en", ", ".join(IDIOMAS))
 
 
 if __name__ == "__main__":
