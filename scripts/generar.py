@@ -4,7 +4,7 @@ en español (raíz), inglés (/en/) y francés (/fr/).
 
 Uso:  python3 scripts/generar.py
 - Textos de la web:            scripts/textos.py
-- Noticias (en español):       scripts/noticias.py
+- Noticias, carteles y próxima edición: data/*.json (se editan desde el portal; ver scripts/datos.py)
 - Traducciones de noticias:    scripts/noticias_traducidas.py
 El resultado son ficheros .html estáticos (lo que publica Cloudflare).
 No edites los .html a mano: se sobrescriben.
@@ -17,7 +17,7 @@ import sys
 RAIZ = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RAIZ / "scripts"))
 from iconos import CLAVE, ICO  # noqa: E402
-from noticias import NOTICIAS  # noqa: E402
+from datos import carteles, noticias, proxima  # noqa: E402
 from noticias_traducidas import TRADUCCIONES  # noqa: E402
 from textos import IDIOMAS, MESES, RUTAS, T  # noqa: E402
 
@@ -25,6 +25,8 @@ DOMINIO = "https://festivallatinoteror.es"
 EMAIL = "festivallatinoteror@gmail.com"
 EMAIL_PRENSA = "prensa@teror.es"
 INSTAGRAM = "https://www.instagram.com/flvteror/"
+NOTICIAS = noticias()
+PROXIMA = proxima()
 FACEBOOK = "https://www.facebook.com/flvteror"
 
 
@@ -77,8 +79,14 @@ def cabecera(lang, seccion, alternas):
             idiomas.append(f'<li><span aria-current="true" lang="{l}" title="{T[l]["nombre_idioma"]}">{T[l]["corto"]}</span></li>')
         else:
             idiomas.append(f'<li><a href="{alternas[l]}" hreflang="{l}" lang="{l}" title="{T[l]["nombre_idioma"]}">{T[l]["corto"]}</a></li>')
+    franja = ""
+    if PROXIMA.get("fechas") or PROXIMA.get("aviso"):
+        rotulo = {"es": "Próxima edición", "en": "Next edition", "fr": "Prochaine édition"}[lang]
+        texto = esc(PROXIMA.get("aviso") or f'{rotulo} · <strong>{PROXIMA["fechas"]}</strong> · Plaza de Sintes, Teror')
+        texto = texto.replace("&lt;strong&gt;", "<strong>").replace("&lt;/strong&gt;", "</strong>")
+        franja = f'<div class="franja-proxima"><div class="contenedor"><p>{ICO["cal"]}<span>{texto}</span></p></div></div>\n'
     return f'''<a class="saltar" href="#contenido">{t["saltar"]}</a>
-<header class="nav">
+{franja}<header class="nav">
   <div class="contenedor">
     <a class="marca" href="{base}" aria-label="{esc(t["ir_inicio"])}"><span class="marca-num" aria-hidden="true">30</span><span>Festival Latino<small>Villa de Teror</small></span></a>
     <div class="nav-derecha">
@@ -176,17 +184,8 @@ def tarjeta_noticia(n, lang):
 
 
 # ---------------------------------------------------------------- inicio
-# Archivo de carteles: (año, edición, imagen, anchos, cabezas de cartel, slug de noticia)
-ARCHIVO = [
-    ("2026", "XXX", "img/carteles/cartel-30", [500, 1000], "Tony &amp; Mimy Succar · Tromboranga", "mas-de-5000-personas-30-aniversario"),
-    ("2025", "XXIX", "img/carteles/cartel-29", [400, 800], "José Alberto «El Canario» · Estrellas de Buena Vista y Más", "29-edicion-jose-alberto-el-canario"),
-    ("2024", "XXVIII", "img/ediciones/edicion-1", [600, 1200], "Issac Delgado y su Orquesta · Los Troveros de Asieta", ""),
-    ("2023", "XXVII", "img/ediciones/edicion-2", [600, 1200], "Alain Pérez y La Orquesta · Compota de Manana", ""),
-    ("2022", "XXVI", "img/ediciones/edicion-3", [600, 1200], "Juan Formell y Los Van Van · Septeto Santiaguero", ""),
-    ("2019", "XXV", "img/ediciones/edicion-4", [600, 1200], "Mixael Cabrera &amp; su Team Barcelona", ""),
-    ("2018", "XXIV", "img/ediciones/edicion-5", [600, 1200], "Canarias Salsa Allstars", ""),
-    ("2017", "XXIII", "img/ediciones/edicion-6", [600, 1200], "NG2 · Iván «Cacú» y su Orquesta", ""),
-]
+# Archivo de carteles: (año, edición, imagen, anchos, cabezas de cartel, slug de noticia) desde data/carteles.json
+ARCHIVO = carteles()
 
 ICONOS_RASGOS = ["mic", "baile", "abierto", "huella"]
 ICONOS_EJES = ["bus", "gota", "recicla", "manos"]

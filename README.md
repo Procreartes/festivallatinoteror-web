@@ -42,3 +42,10 @@ tipografías alojadas en la propia web (sin llamadas a Google) · cabeceras de s
 en `_headers` · datos estructurados para Google · contacto solo por email.
 
 Analítica: activar **Cloudflare Web Analytics** desde el panel (no usa cookies).
+
+## Noticias, carteles y próxima edición (desde el portal)
+
+Se editan en **Portal → Gestor de webs → Festival Latino Villa de Teror** y viven en `data/`:
+`noticias.json` (con foto), `carteles.json` (archivo de ediciones) y `proxima.json` (si se ponen fechas, sale una franja
+arriba en todas las páginas). Al publicar, la acción **Publicar la web** regenera las páginas y Cloudflare las sirve.
+Las noticias nuevas salen en español también en /en/ y /fr/ hasta que se añada su traducción en `scripts/noticias_traducidas.py`.

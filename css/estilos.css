@@ -303,3 +303,11 @@ p{margin:0 0 1em}
 .idiomas span[aria-current]{background:var(--magenta);color:#fff}
 @media (max-width:1080px){.menu a{padding:10px 8px;letter-spacing:.06em}}
 @media (max-width:880px){.nav .menu{margin-left:0}.nav-derecha{margin-left:auto}}
+
+/* Franja con las fechas de la próxima edición (data/proxima.json) */
+.franja-proxima{background:var(--magenta);color:#fff;font-size:.98rem}
+.franja-proxima .contenedor{display:flex;justify-content:center;padding:9px 0;text-align:center}
+.franja-proxima p{margin:0;display:inline-flex;align-items:center;gap:8px}
+.franja-proxima svg{width:18px;height:18px;flex:none}
+.franja-proxima strong{font-weight:800}
+@media (max-width:600px){.franja-proxima{font-size:.88rem}}

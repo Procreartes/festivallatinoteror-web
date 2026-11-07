@@ -1,0 +1,58 @@
+[
+  {
+    "anio": "2026",
+    "edicion": "XXX",
+    "imagen": "img/carteles/cartel-30",
+    "cabezas": "Tony & Mimy Succar · Tromboranga",
+    "noticia": "mas-de-5000-personas-30-aniversario"
+  },
+  {
+    "anio": "2025",
+    "edicion": "XXIX",
+    "imagen": "img/carteles/cartel-29",
+    "cabezas": "José Alberto «El Canario» · Estrellas de Buena Vista y Más",
+    "noticia": "29-edicion-jose-alberto-el-canario"
+  },
+  {
+    "anio": "2024",
+    "edicion": "XXVIII",
+    "imagen": "img/ediciones/edicion-1",
+    "cabezas": "Issac Delgado y su Orquesta · Los Troveros de Asieta",
+    "noticia": ""
+  },
+  {
+    "anio": "2023",
+    "edicion": "XXVII",
+    "imagen": "img/ediciones/edicion-2",
+    "cabezas": "Alain Pérez y La Orquesta · Compota de Manana",
+    "noticia": ""
+  },
+  {
+    "anio": "2022",
+    "edicion": "XXVI",
+    "imagen": "img/ediciones/edicion-3",
+    "cabezas": "Juan Formell y Los Van Van · Septeto Santiaguero",
+    "noticia": ""
+  },
+  {
+    "anio": "2019",
+    "edicion": "XXV",
+    "imagen": "img/ediciones/edicion-4",
+    "cabezas": "Mixael Cabrera & su Team Barcelona",
+    "noticia": ""
+  },
+  {
+    "anio": "2018",
+    "edicion": "XXIV",
+    "imagen": "img/ediciones/edicion-5",
+    "cabezas": "Canarias Salsa Allstars",
+    "noticia": ""
+  },
+  {
+    "anio": "2017",
+    "edicion": "XXIII",
+    "imagen": "img/ediciones/edicion-6",
+    "cabezas": "NG2 · Iván «Cacú» y su Orquesta",
+    "noticia": ""
+  }
+]
